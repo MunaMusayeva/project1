@@ -1,0 +1,331 @@
+#include<iostream>
+#include <fstream>
+#include<string>
+#include<vector>
+using namespace std;
+
+class Date {
+public:
+	int day;
+	int month;
+	int year;
+	Date() {
+
+	}
+	Date(int day, int month, int year)
+	{
+		this->day = day;
+		this->month = month;
+		this->year = year;
+	}
+	void showDate() {
+		cout << "Day:" << day << endl;
+		cout << "Month:" << month << endl;
+		cout << "year:" << year << endl;
+	}
+
+};
+class Customer {
+public:
+	int id;
+	string name;
+	string surname;
+	Date dateOfBirth;
+	Customer() {
+
+	}
+	Customer(int id, string name, string surname, Date dateOfBirth)
+	{
+		this->id = id;
+		this->name = name;
+		this->surname = surname;
+		this->dateOfBirth = dateOfBirth;
+	}
+
+	friend istream& operator>>(istream& input, Customer& c) {
+		cout << "Id:";
+		cin >> c.id;
+		cout << "Name:";
+		cin.ignore();
+		getline(input, c.name);
+		cout << "Surname:";
+		getline(input, c.surname);
+
+		cin.ignore();
+		return input;
+	}
+	friend ostream& operator<<(ostream& output, const Customer& c) {
+		output << "\nId:" << c.id << endl;
+		output << "Name:" << c.name << endl;
+		output << "Surname:" << c.surname << endl;
+
+
+
+		return output;
+
+	}
+
+};
+
+
+class Product {
+public:
+	int id;
+	string name;
+	double price;
+	string color;
+	Product() {
+
+	}
+	Product(int id, string name, double price, string color)
+	{
+		this->id = id;
+		this->name = name;
+		this->price = price;
+		this->color = color;
+
+	}
+	void showProduct() const {
+		cout << "Id:" << id << endl;
+		cout << "Name:" << name << endl;
+		cout << "Price:" << price << endl;
+		cout << "Color:" << color << endl;
+		cout << endl;
+	}
+};
+class ProductItem {
+public:
+	int id = 0;
+	Product* product;
+	int quantity = 0;
+	ProductItem() = default;
+	;
+
+	ProductItem(int id, Product* product, int quantity)
+	{
+		this->id = id;
+		this->product = product;
+		this->quantity = quantity;
+	}
+	void showProductItem() {
+		cout << "id:" << id << endl;
+	
+		product->showProduct();
+		cout << "quantity:" << quantity << endl;
+	}
+
+	double TotalPrice() const { return product->price * quantity; }
+	
+};
+class Order {
+public:
+	vector<ProductItem> productItem;
+	int custumerId;
+	Date* datetime;
+	Order() {
+
+	}
+	Order(vector<ProductItem> productItem, int custumerId, Date* datetime)
+	{
+		this->productItem = productItem;
+		this->custumerId = custumerId;
+		this->datetime = datetime;
+
+
+	}
+	
+	void showOrder() const {
+		cout << "customer id:" << custumerId << endl;
+		cout << "Date:" << datetime->day << "/" << datetime->month << "/" << datetime->year << endl;
+		cout << "Products:" << endl;
+		for (const auto& item : productItem) {
+
+			cout << "Product id: " << item.product->id << endl;
+			cout << "Product name: " << item.product->name << endl;
+			cout << "Product quantity: " << item.quantity << endl;
+			cout << "Product price: " << item.product->price << endl;
+			cout << "Product color: " << item.product->color << endl;
+			cout << "Total price: " << item.TotalPrice() << endl;
+			cout << endl;
+		}
+
+	}
+	void addProductItems(const vector<ProductItem>& items) {
+		for (const auto& item : items) {
+			productItem.push_back(item);
+		}
+	}
+};
+template<typename T1, typename T2, typename T3>
+class Database {
+public:
+	vector<ProductItem> productItem;
+	vector<Order> orders;
+	vector<Customer> customers;
+	Database() {
+
+	}
+	Database(vector<ProductItem> productItem, vector<Order> orders, vector<Customer> customers)
+	{
+		this->productItem = productItem;
+		this->orders = orders;
+		this->productItem = productItem;
+	}
+	void addOrder(const Order& order) {
+		orders.push_back(order);
+	}
+
+
+
+	void writeOrdersToFile(const string& filename) {
+		ofstream outFile(filename);
+		double Totall=0;
+		if (outFile.is_open()) {
+			for (const auto& order : orders) {
+				outFile << "Customer ID: " << order.custumerId << endl;
+				outFile << "Date: " << order.datetime->day << "/" << order.datetime->month << "/" << order.datetime->year << endl;
+				outFile << "Total Orders:" << endl;
+				for (const auto& item : order.productItem) {
+					outFile << "Product id: " << item.product->id<< endl;
+					outFile << "Product name: " << item.product->name << endl;
+					outFile << "Product quantity: " <<item.quantity << endl;
+					outFile << "Product price: " << item.product->price << endl;
+					outFile << "Product color: " << item.product->color << endl;
+					outFile << "Total price: " << item.TotalPrice() << endl;
+					outFile << endl;
+					Totall += item.TotalPrice();
+				}
+
+				outFile << "--------------------------------------" << endl;
+				outFile << "Total:" << Totall << endl;
+				
+			}
+			outFile.close();
+			cout << "Mehsullar  " << filename << " file-na yazdirildi!" << endl;
+		}
+		else {
+			cout << "Mehsullar " << filename << "yazdirilmadi" << endl;
+		}
+	}
+
+	void writeCustomers(const string& filename) {
+		ofstream outFile(filename);
+		if (outFile.is_open()) {
+			for (const auto& customer : customers) {
+				outFile << "ID:" << customer.id << endl;
+				outFile << "Name:" << customer.name << endl;
+				outFile << "Surname:" << customer.surname << endl;
+				outFile << "Date of Birth:" << customer.dateOfBirth.day << "/" << customer.dateOfBirth.month << "/" << customer.dateOfBirth.year << endl;
+				outFile << endl;
+
+			}
+			outFile.close();
+			cout << "Mehsullar " << filename << "file-na yazdirildi!" << endl;
+
+		}
+		else {
+			cout << "Mehsullar " << filename << "file-na yazdirilmadi!" << endl;
+		}
+	}
+
+};
+void main() {
+	vector<Product> products;
+	vector<Order> orders;
+	vector<ProductItem>productItems;
+	Database<Customer, ProductItem, Order> database;
+	Date d1(1, 3, 2024);
+	Date d2(17, 9, 2004);
+	Date d3(4, 5, 2024);
+	Date d4(6, 7, 2023);
+	
+	int cust_id;
+	double totall = 0;
+	string name;
+	string surname;
+	vector<Customer>customers;
+	cout << "Id:";
+	cin >> cust_id;
+	cout << "Name:";
+	cin >> name;
+	cout << "Surname:";
+	cin >> surname;
+	
+	Customer newCust(cust_id, name, surname, d2);
+	database.customers.push_back(newCust);
+	Product p1(1, "kitab", 15, "red");
+	Product p2(2, "defter", 3, "white");
+	Product p3(3, "qelem qabi", 5, "black");
+	Product p4(4, "pozan", 2, "white");
+	Product p5(5, "karandas", 3, "gray");
+	Product p6(6, "canta", 40, "purple");
+	Product p7(7, "ajanda", 18, "black");
+	products.push_back(p1);
+	products.push_back(p2);
+	products.push_back(p3);
+	products.push_back(p4);
+	products.push_back(p5);
+	products.push_back(p6);
+	products.push_back(p7);
+	
+	for (const auto& product : products) {
+		product.showProduct();
+	}
+	cout << endl;
+
+
+	int inputId;
+
+	char add_product = 'y';
+	while (add_product == 'y') {
+		cout << "Hansi mehsulu isteyirsiniz?(id-ye gore daxil edin)" << endl;
+		cout << "id-ni daxil edin:";
+		cin >> inputId;
+		bool found = false;
+		try {
+			for (const auto& product : products) {
+				if (inputId == product.id) {
+					int count;
+					cout << "Sayini daxil edin:";
+					cin >> count;
+					Product* newProduct = new Product(product);
+					productItems.push_back(ProductItem(inputId, newProduct, count));
+					orders.push_back(Order(productItems, cust_id, &d2));
+					found = true;
+				}
+			}
+			if (!found) {
+				throw"Mehsul tapilmadi!";
+			}
+		}
+		catch (const std::exception& ex)
+		{
+			cout << ex.what();
+		}
+		for (const auto& ProductItem : productItems) {
+			totall += ProductItem.TotalPrice();
+		}
+		cout << "yene elave etmek isteyirsinizmi?(yes ucun y duymesini no ucun n duymesini basin)";
+		cin >> add_product;
+
+	}
+	Order newOrder(productItems, cust_id, &d2);
+	orders.push_back(newOrder);
+	database.orders.push_back(newOrder);
+	
+
+database.writeOrdersToFile("C:\\Users\\sabina\\Desktop\\orders.txt");
+database.writeCustomers("C:\\Users\\sabina\\Desktop\\customers.txt");
+}
+
+
+
+
+
+
+
+
+
+
+
+
